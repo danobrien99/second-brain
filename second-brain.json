@@ -1,0 +1,669 @@
+{
+  "name": "My workflow 7",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "slack-events",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "64c2a158-4cde-48a8-941c-21d0851ad219",
+      "name": "Webhook",
+      "webhookId": "3e212129-3117-4cdb-957d-0caaea680f2a"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "49375257-2eea-4337-a329-a028a2a88728",
+              "name": "text",
+              "value": "={{$json.body.event.text}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e71748a3-e624-44e2-9fb2-971b03de105c",
+      "name": "Extract Text"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-pro",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-pro"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{$json.text}}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {
+          "systemMessage": "You are a strict JSON generator for a Second Brain system.\n\nYour task:\n1. Classify the input into ONE of these types:\n   - people\n   - projects\n   - ideas\n   - admin\n\n2. Based on the type, output JSON that matches the EXACT schema for that type.\n\nYou MUST output valid JSON only.\nNo markdown.\nNo explanation.\nNo extra keys.\nNo missing keys.\n\nSCHEMAS:\n\nIf type = \"people\", output:\n{\n  \"type\": \"people\",\n  \"name\": \"string\",\n  \"context\": \"string\",\n  \"follow_ups\": \"string\",\n  \"confidence\": number\n}\n\nIf type = \"projects\", output:\n{\n  \"type\": \"projects\",\n  \"name\": \"string\",\n  \"status\": \"Active | Waiting | Blocked | Someday | Done\",\n  \"next_action\": \"string\",\n  \"notes\": \"string\",\n  \"confidence\": number\n}\n\nIf type = \"ideas\", output:\n{\n  \"type\": \"ideas\",\n  \"name\": \"string\",\n  \"one_liner\": \"string\",\n  \"notes\": \"string\",\n  \"confidence\": number\n}\n\nIf type = \"admin\", output:\n{\n  \"type\": \"admin\",\n  \"name\": \"string\",\n  \"due_date\": \"YYYY-MM-DD or empty string\",\n  \"confidence\": number\n  \"status\": \"Open | Done\"\n}\n\nRules:\n- Choose the schema strictly based on type\n- Use empty strings if information is missing\n- Confidence must be between 0 and 1\n- If unsure, confidence must be below 0.6\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        0
+      ],
+      "id": "936e2951-c116-464c-967b-68092c1521c5",
+      "name": "Message a model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2jcmrcpWw6e9iCAn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "df894e53-6fe5-4184-9a11-b5b85de70e9f",
+              "name": "parsed",
+              "value": "={{ JSON.parse($json.content.parts[0].text) }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        0
+      ],
+      "id": "d8b27550-70e6-4e1b-905e-4d8a447bf93c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$node[\"Confidence Gate\"].json.parsed.type}}",
+                    "rightValue": "people",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "dfbce2b5-aa2d-485c-8238-ec087897c237"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8127b6c8-2860-4cca-a883-35bbffa83d4f",
+                    "leftValue": "={{$node[\"Confidence Gate\"].json.parsed.type}}",
+                    "rightValue": "projects",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "424d8e27-01bd-4cc2-afaa-f65888c84d99",
+                    "leftValue": "={{$node[\"Confidence Gate\"].json.parsed.type}}",
+                    "rightValue": "ideas",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "eb24b075-72d8-4d31-aa57-d9d594fba30c",
+                    "leftValue": "={{$node[\"Confidence Gate\"].json.parsed.type}}",
+                    "rightValue": "admin",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1344,
+        -48
+      ],
+      "id": "80413c83-2288-4068-a363-f7a925211d14",
+      "name": "Type Router"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "2e42435a-6bb3-8066-81c7-fc7efe616115",
+          "mode": "list",
+          "cachedResultName": "Inbox Log",
+          "cachedResultUrl": "https://www.notion.so/2e42435a6bb3806681c7fc7efe616115"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Captured Text|title",
+              "title": "={{$node[\"Extract Text\"].json.text}}"
+            },
+            {
+              "key": "Filed To|select",
+              "selectValue": "={{$json.parsed.type}}"
+            },
+            {
+              "key": "Record ID|rich_text",
+              "textContent": "={{$execution.id}}"
+            },
+            {
+              "key": "Confidence|number",
+              "numberValue": "={{$json.parsed.confidence}}"
+            },
+            {
+              "key": "Timestamp|date",
+              "date": "={{$now}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        -16
+      ],
+      "id": "0795e605-f328-4ef9-9ef2-c05d07881339",
+      "name": "Inbox Log",
+      "credentials": {
+        "notionApi": {
+          "id": "ustHcsOuGfVRY1kM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "09dd16b0-e446-48eb-b735-aad1528415d7",
+              "leftValue": "={{$json.parsed.confidence}}",
+              "rightValue": 0.6,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        928,
+        0
+      ],
+      "id": "fb808a77-f62e-4c02-aa36-c7727c146f01",
+      "name": "Confidence Gate"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "2e42435a-6bb3-8035-8e8c-ffce8eb69455",
+          "mode": "list",
+          "cachedResultName": "People Database",
+          "cachedResultUrl": "https://www.notion.so/2e42435a6bb380358e8cffce8eb69455"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Name|title",
+              "title": "={{$node[\"Confidence Gate\"].json.parsed.name}}"
+            },
+            {
+              "key": "Context|rich_text",
+              "textContent": "={{$node[\"Confidence Gate\"].json.parsed.context}}"
+            },
+            {
+              "key": "Follow-ups|rich_text",
+              "textContent": "={{$node[\"Confidence Gate\"].json.parsed.follow_ups}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        -272
+      ],
+      "id": "24513a88-4794-4286-9615-fcc66d930947",
+      "name": "People Database",
+      "credentials": {
+        "notionApi": {
+          "id": "ustHcsOuGfVRY1kM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "2e42435a-6bb3-8048-b427-ea8ffc6ad9ea",
+          "mode": "list",
+          "cachedResultName": "Projects database",
+          "cachedResultUrl": "https://www.notion.so/2e42435a6bb38048b427ea8ffc6ad9ea"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Name|title",
+              "title": "={{$node[\"Confidence Gate\"].json.parsed.name}}"
+            },
+            {
+              "key": "Notes|rich_text",
+              "textContent": "={{$node[\"Confidence Gate\"].json.parsed.notes}}"
+            },
+            {
+              "key": "Next Action|rich_text",
+              "textContent": "={{$node[\"Confidence Gate\"].json.parsed.next_action}}"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "={{$node[\"Confidence Gate\"].json.parsed.status}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1584,
+        -112
+      ],
+      "id": "0dd99191-5648-401f-bfe3-b8b5c0d32ac7",
+      "name": "Projects Database",
+      "credentials": {
+        "notionApi": {
+          "id": "ustHcsOuGfVRY1kM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "2e42435a-6bb3-8049-a8ba-cab1bd127102",
+          "mode": "list",
+          "cachedResultName": "Ideas database",
+          "cachedResultUrl": "https://www.notion.so/2e42435a6bb38049a8bacab1bd127102"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Name|title",
+              "title": "={{$node[\"Confidence Gate\"].json.parsed.name}}"
+            },
+            {
+              "key": "One-liner|rich_text",
+              "textContent": "={{$node[\"Confidence Gate\"].json.parsed.one_liner}}"
+            },
+            {
+              "key": "Notes|rich_text",
+              "textContent": "={{$node[\"Confidence Gate\"].json.parsed.notes}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1728,
+        0
+      ],
+      "id": "3818f8cc-1393-4ac3-9eba-96551b92edfc",
+      "name": "Ideas Database",
+      "credentials": {
+        "notionApi": {
+          "id": "ustHcsOuGfVRY1kM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "2e42435a-6bb3-8007-80fa-e9808a6bdbf3",
+          "mode": "list",
+          "cachedResultName": "Admin database",
+          "cachedResultUrl": "https://www.notion.so/2e42435a6bb3800780fae9808a6bdbf3"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Name|title",
+              "title": "={{$node[\"Confidence Gate\"].json.parsed.name}}"
+            },
+            {
+              "key": "Due Date|date",
+              "range": "={{$node[\"Confidence Gate\"].json.parsed.due_date}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        160
+      ],
+      "id": "e3779f2b-f48e-4473-91f2-b92869f87dd3",
+      "name": "Admin Database",
+      "credentials": {
+        "notionApi": {
+          "id": "ustHcsOuGfVRY1kM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "2e42435a-6bb3-8066-81c7-fc7efe616115",
+          "mode": "list",
+          "cachedResultName": "Inbox Log",
+          "cachedResultUrl": "https://www.notion.so/2e42435a6bb3806681c7fc7efe616115"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Captured Text|title",
+              "title": "={{$node[\"Extract Text\"].json.text}}"
+            },
+            {
+              "key": "Filed To|select",
+              "selectValue": "={{$json.parsed.type}}"
+            },
+            {
+              "key": "Record ID|rich_text",
+              "textContent": "={{$execution.id}}"
+            },
+            {
+              "key": "Confidence|number",
+              "numberValue": "={{$json.parsed.confidence}}"
+            },
+            {
+              "key": "Timestamp|date",
+              "date": "={{$now}}"
+            },
+            {
+              "key": "Needs Review|rich_text",
+              "textContent": "Yes"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        128
+      ],
+      "id": "a1b4ccaf-867b-4827-8f17-09dc7bce8abf",
+      "name": "Inbox Log1",
+      "credentials": {
+        "notionApi": {
+          "id": "ustHcsOuGfVRY1kM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Slack  Data Feeder\n## Covers:\n  * Slack Integration\n  * Thought Classification\n  * Storing in Notion",
+        "height": 608,
+        "width": 1952,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -16,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "6f881987-07c1-453a-bdb0-e66064d01675",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Confidence Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inbox Log": {
+      "main": [
+        [
+          {
+            "node": "Type Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confidence Gate": {
+      "main": [
+        [
+          {
+            "node": "Inbox Log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Inbox Log1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Type Router": {
+      "main": [
+        [
+          {
+            "node": "People Database",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Projects Database",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ideas Database",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Admin Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "54e7cbda-d93b-4188-99f5-a8aeaa56bc13",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d7cbb828a936a50dfa3d5a5ef9c93f7be15f9cbfe6b27940f3b6d30ca405fbfd"
+  },
+  "id": "Gcxw_fdfCplQUT8GSv7JJ",
+  "tags": []
+}
