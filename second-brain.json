@@ -1,6 +1,34 @@
 {
-  "name": "My workflow 7",
+  "name": "second-brain",
   "nodes": [
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A8SRVECP2",
+          "mode": "list",
+          "cachedResultName": "sb-inbox"
+        },
+        "text": "={{$json.content.parts[0].text}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1632,
+        896
+      ],
+      "id": "71117c6a-59fd-4b1b-a07c-d9d7fd0cc48c",
+      "name": "Send a message",
+      "webhookId": "44a0c1ae-36f1-4f99-8f13-787e17780819",
+      "credentials": {
+        "slackApi": {
+          "id": "gfvmIjGoJcdGB8Hq",
+          "name": "Slack account 2"
+        }
+      }
+    },
     {
       "parameters": {
         "httpMethod": "POST",
@@ -331,8 +359,8 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        1680,
-        -272
+        1552,
+        -256
       ],
       "id": "24513a88-4794-4286-9615-fcc66d930947",
       "name": "People Database",
@@ -378,8 +406,8 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        1584,
-        -112
+        1648,
+        -144
       ],
       "id": "0dd99191-5648-401f-bfe3-b8b5c0d32ac7",
       "name": "Projects Database",
@@ -421,8 +449,8 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        1728,
-        0
+        1776,
+        48
       ],
       "id": "3818f8cc-1393-4ac3-9eba-96551b92edfc",
       "name": "Ideas Database",
@@ -460,8 +488,8 @@
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
       "position": [
-        1600,
-        160
+        1616,
+        176
       ],
       "id": "e3779f2b-f48e-4473-91f2-b92869f87dd3",
       "name": "Admin Database",
@@ -529,19 +557,269 @@
     },
     {
       "parameters": {
-        "content": "# Slack  Data Feeder\n## Covers:\n  * Slack Integration\n  * Thought Classification\n  * Storing in Notion",
-        "height": 608,
-        "width": 1952,
-        "color": 4
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        880
+      ],
+      "id": "b37c42ef-8b07-4091-9bf5-358b8383318e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "2e42435a-6bb3-8035-8e8c-ffce8eb69455",
+          "mode": "list",
+          "cachedResultName": "People Database",
+          "cachedResultUrl": "https://www.notion.so/2e42435a6bb380358e8cffce8eb69455"
+        },
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Last Edited|last_edited_time",
+              "condition": "on_or_before",
+              "lastEditedTime": "={{$now.startOf('day').toISO()}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        640
+      ],
+      "id": "9b408462-8b60-47fd-929c-4ff299ceaef7",
+      "name": "People Log",
+      "credentials": {
+        "notionApi": {
+          "id": "ustHcsOuGfVRY1kM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "2e42435a-6bb3-8049-a8ba-cab1bd127102",
+          "mode": "list",
+          "cachedResultName": "Ideas database",
+          "cachedResultUrl": "https://www.notion.so/2e42435a6bb38049a8bacab1bd127102"
+        },
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Last edited time|last_edited_time",
+              "condition": "on_or_before",
+              "lastEditedTime": "={{$now.startOf('day').toISO()}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        816
+      ],
+      "id": "bae2fc0b-6d11-49c7-8443-2def59fbbe7f",
+      "name": "Ideas Log",
+      "credentials": {
+        "notionApi": {
+          "id": "ustHcsOuGfVRY1kM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "2e42435a-6bb3-8048-b427-ea8ffc6ad9ea",
+          "mode": "list",
+          "cachedResultName": "Projects database",
+          "cachedResultUrl": "https://www.notion.so/2e42435a6bb38048b427ea8ffc6ad9ea"
+        },
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Last edited time|last_edited_time",
+              "condition": "on_or_before",
+              "lastEditedTime": "={{$now.startOf('day').toISO()}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        992
+      ],
+      "id": "c306f827-aeb9-4a87-a082-c7fe7fc2fb09",
+      "name": "Projects Log",
+      "credentials": {
+        "notionApi": {
+          "id": "ustHcsOuGfVRY1kM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "2e42435a-6bb3-8007-80fa-e9808a6bdbf3",
+          "mode": "list",
+          "cachedResultName": "Admin database",
+          "cachedResultUrl": "https://www.notion.so/2e42435a6bb3800780fae9808a6bdbf3"
+        },
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Last edited time|last_edited_time",
+              "condition": "on_or_before",
+              "lastEditedTime": "={{$now.startOf('day').toISO()}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        1184
+      ],
+      "id": "24c3c088-a987-41d5-9702-8fbdbbfe855e",
+      "name": "Admin Log",
+      "credentials": {
+        "notionApi": {
+          "id": "ustHcsOuGfVRY1kM",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        864
+      ],
+      "id": "396bb0b4-264f-4f46-8c04-ad597833a858",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-pro",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-pro"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Here is the data from my Notion databases for today's digest:\n\n{{ JSON.stringify($json.all_data, null, 2) }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "systemMessage": "You are a daily executive assistant.\n\nCreate a concise daily digest.\nMax 150 words.\nTone: calm, direct, practical.\n\nStructure:\n- Today’s focus (max 3 items)\n- Overdue or risky item (if any)\n- Optional small win or progress\n\nRules:\n- Use only the provided data\n- Do not invent items\n- Do not ask questions\n- No emojis\n- Do NOT use markdown. Output plain text only."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1280,
+        896
+      ],
+      "id": "486cabf1-1e02-4442-b3dc-6af469ad5d21",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2jcmrcpWw6e9iCAn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Grab all data from the 4 Notion nodes, regardless of how many runs they had\nconst people = $(\"People Log\").all();\nconst ideas = $(\"Ideas Log\").all();\nconst projects = $(\"Projects Log\").all();\nconst admin = $(\"Admin Log\").all();\n\n// Combine them into one clean list\nconst combined = [\n  ...people,\n  ...ideas,\n  ...projects,\n  ...admin\n].map(item => item.json);\n\n// Return as a single item so the next node (Gemini) only runs ONCE\nreturn [{\n  json: {\n    all_data: combined,\n    count: combined.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        896
+      ],
+      "id": "b0acba6f-7368-4335-8a2f-8c47a770750d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "## Data Collection Flow \n - Webhook → Receives Slack Events (POST /slack-events)\n - Extract Text → Pulls message text from body.event.text\n - LLM Classifier → Gemini classifies input into people | projects | ideas | admin (strict JSON)\n - JSON Parse → Converts model output text into structured JSON\n - Confidence Gate → confidence > 0.6 auto-file, else mark Needs Review\n - Inbox Log → Logs every message with text, type, confidence, timestamp\n - Type Router → Routes item based on parsed.type\n - People DB → Stores contacts, context, follow-ups\n - Projects DB → Stores project name, status, next action, notes\n - Ideas DB → Stores idea name, one-liner, notes\n - Admin DB → Stores admin tasks with optional due date\n - Needs Review Path → Low-confidence items flagged for manual review",
+        "height": 736,
+        "width": 2160
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -16,
-        -288
+        -128,
+        -400
       ],
       "typeVersion": 1,
-      "id": "6f881987-07c1-453a-bdb0-e66064d01675",
+      "id": "ecf6e201-0253-4903-a873-45e04cd8e85b",
       "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Daily briefing pipeline overview \n - Schedule Trigger → Runs daily at 9 AM\n - People Log → Fetches People records edited on or before today\n - Ideas Log → Fetches Ideas records edited on or before today\n - Projects Log → Fetches Projects records edited on or before today\n - Admin Log → Fetches Admin records edited on or before today\n - Merge → Combines outputs from all four Notion databases\n - Code (JS) → Flattens all records into a single list and forces single execution\n - LLM Digest → Gemini generates a concise daily executive summary (plain text)\n - Slack Send → Posts the daily digest to #sb-inbox channel\n",
+        "height": 784,
+        "width": 2160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -128,
+        592
+      ],
+      "typeVersion": 1,
+      "id": "92ff76aa-bed7-4bcc-99e8-f5328e327fb7",
+      "name": "Sticky Note1"
     }
   ],
   "pinData": {},
@@ -650,6 +928,109 @@
           }
         ]
       ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "People Log",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ideas Log",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Projects Log",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Admin Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Admin Log": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Projects Log": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Ideas Log": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "People Log": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -659,7 +1040,7 @@
     "timeSavedMode": "fixed",
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "54e7cbda-d93b-4188-99f5-a8aeaa56bc13",
+  "versionId": "9bb872b2-5aa6-4303-8337-0f50c3afaefc",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "d7cbb828a936a50dfa3d5a5ef9c93f7be15f9cbfe6b27940f3b6d30ca405fbfd"
