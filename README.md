@@ -37,6 +37,7 @@ For 500,000 years, humans have had the same cognitive limitations:
 3. **Automatic Routing** - Each thought goes to the right Notion database
 4. **Confidence Scoring** - Low-confidence items flagged for review
 5. **Audit Trail** - Every capture logged with timestamp and metadata
+6. **Daily Digest** - Automated morning summary delivered to Slack at 9 AM
 
 ### What You Get
 
@@ -49,6 +50,8 @@ For 500,000 years, humans have had the same cognitive limitations:
 ---
 
 ## 🏗️ System Architecture
+
+### Data Collection Flow
 
 ```mermaid
 graph LR
@@ -63,6 +66,23 @@ graph LR
     G -->|ideas| J[Ideas DB]
     G -->|admin| K[Admin DB]
     F --> L[Manual Review Queue]
+```
+
+### Daily Digest Flow
+
+```mermaid
+graph LR
+    A[Schedule Trigger<br/>9 AM Daily] --> B[People DB]
+    A --> C[Projects DB]
+    A --> D[Ideas DB]
+    A --> E[Admin DB]
+    B --> F[Merge Data]
+    C --> F
+    D --> F
+    E --> F
+    F --> G[JavaScript Aggregator]
+    G --> H[Google Gemini AI]
+    H -->|Plain Text Summary| I[Slack Channel]
 ```
 
 ### Technology Stack
@@ -261,7 +281,40 @@ No markdown. No explanation. No extra keys. No missing keys.
 
 ---
 
-## 🎨 Customization Ideas
+## 📬 Daily Digest Workflow
+
+The system includes an automated daily digest that runs every morning at 9 AM:
+
+### How It Works
+
+1. **Schedule Trigger** - Activates daily at 9:00 AM
+2. **Data Collection** - Fetches records from all 4 databases (People, Projects, Ideas, Admin)
+   - Filters: Records edited on or before today
+3. **Aggregation** - JavaScript code combines all records into a single dataset
+4. **AI Summary** - Google Gemini generates a concise executive summary:
+   - Max 150 words
+   - Plain text (no markdown)
+   - Calm, direct, practical tone
+5. **Delivery** - Posted to your Slack `#sb-inbox` channel
+
+### Digest Format
+
+The AI creates a structured summary with:
+- **Today's focus** - Top 3 priority items
+- **Overdue/risky items** - Anything requiring immediate attention
+- **Progress notes** - Small wins or recent updates
+
+### Customization
+
+You can adjust:
+- **Timing**: Change `triggerAtHour` in the Schedule Trigger node (default: 9 AM)
+- **Tone**: Modify the system prompt in the "Message a model" node
+- **Length**: Adjust max word count in the prompt (default: 150 words)
+- **Filters**: Change date filters to show different time ranges
+
+---
+
+## 🎨 Additional Customization Ideas
 
 Once your core loop is working, you can extend with:
 
@@ -269,8 +322,8 @@ Once your core loop is working, you can extend with:
 - **Meeting Prep** - Pull relevant people/projects before meetings
 - **Email Forwarding** - Forward important emails to Slack
 - **Birthday Reminders** - Auto-surface from People database
-- **Daily Digest** - Morning summary of active items
 - **Weekly Review** - Automated rollup of the week
+- **Custom Digest Times** - Add evening or weekend summaries
 
 **Remember:** Build the core loop first. Add modules only when you have evidence they're needed.
 
